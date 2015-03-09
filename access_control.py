@@ -106,7 +106,7 @@ def alert_access_members(message):
 
 	print ",".join(numbers)
 	#TODO: change to actual access members :P
-	ph = config.read('SMS', 'master_phone')
+	ph = config.get('SMS', 'masterPhone')
 	send_message(ph, message)
 
 #TODO: send via SMS, email or whatever
@@ -118,14 +118,14 @@ def alert_alarm_members(message):
         numbers.append(anm[3])
 
     print ",".join(numbers)
-    ph = config.read('SMS', 'master_phone')
+    ph = config.get('SMS', 'masterPhone')
     send_message(ph, message)
 
 def send_message(numbers, message):
     # http://api.smsbrodcast.com.au/api.php?username=myuser&password=abc123&from=0400111222&to=0411222333,0422333444&message=Hello%20wor
     global config
-    sms_uname = config.read('SMS', 'username')
-    sms_pwd = config.read('SMS', 'password')
+    sms_uname = config.get('SMS', 'username')
+    sms_pwd = config.get('SMS', 'password')
     url = 'http://api.smsbroadcast.com.au/api.php'
     payload = {'username': sms_uname, 'password': sms_pwd, 'from': 'Hackerspace', 'to': numbers, 'message': message}
     r = requests.get(url, params=payload)
