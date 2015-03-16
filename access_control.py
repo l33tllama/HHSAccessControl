@@ -56,6 +56,11 @@ config = config = ConfigParser.RawConfigParser()
 # Send SMS/email to important people
 # Arm and disarm alarm functions - set alarm pin high/low?
 
+# terminal logging
+def print_log(message):
+	outMsg = dt.datetime.strftime(dt.datetime.now(), "%a %d %b %Y %H:%M:%S: ") + message
+	print outMsg
+
 def timeout(job_fn, *fn_args, **delta_args):
     """
     Usage:
@@ -74,15 +79,27 @@ def is_allowed(rfid):
     cur = db.cursor()
     #NOTE: took out check for expiry date because my tag has expired.. 
     #NOTE: Also we should include a grace period, as before -Leo 
-    #cur.execute("SELECT name FROM access_list WHERE rfid = '%s' and end_date > date('now')" % rfid)
-    cur.execute("SELECT name FROM access_list WHERE rfid = '%s'" % rfid)
+    cur.execute("SELECT name FROM access_list WHERE rfid = '%s' and end_date > date('now')" % rfid)
     results = cur.fetchall()
+    #cur.execute("SELECT name FROM access_list WHERE rfid = '%s'" % rfid)
     
-    db.close()
-
+    
     if len(results) == 0:
+        cur.execute("SELECT name FROM access_list WHERE rfid = '%s'" % rfid)
+        results = cur.fetchall()
+        if len(results) > 0:
+            print_log(results[0][1] + " scanned their tage to enter and their access membership has expired! But we're letting them in anyway..")
+            #ph = config.get('SMS', 'masterPhone')'SMS', 'masterPhone')
+            ph = results[0][3]
+            #message = "Hackerspace member " + results[0][1] + " tried to enter but their membership has expired."
+            message = "Hey " + results[0][1].split(" ")[0] + ", your Hobart Hackerspace access has expired, but we're cool and will let you in for now. Please re-register on the website."
+            send_message(ph, message)
+            #We'll let people in for now until the notifications are sent out to expired members, and their end date is increased by a fair amount..
+            return (results[0], True)
+        db.close()
         return (None, False)
     else:
+        db.close()
         return (results[0], True)
 
 def on(pin):
@@ -101,10 +118,10 @@ def alert_access_members(message):
 	access_notify_members = get_access_notify_members()
 	numbers = []    
 	for anm in access_notify_members:
-		print "Hey %s, " % anm[1] + message
+		print_log("Hey %s, " % anm[1] + message)
 		numbers.append(anm[3])
 
-	print ",".join(numbers)
+	print_log(",".join(numbers))
 	#TODO: change to actual access members :P
 	ph = config.get('SMS', 'masterPhone')
 	send_message(ph, message)
@@ -114,10 +131,10 @@ def alert_alarm_members(message):
     alarm_notify_members = get_alarm_notify_members()
     numbers = []
     for anm in alarm_notify_members:
-        print "Hey %s, " % anm[1] + message
+        print_log("Hey %s, " % anm[1] + message)
         numbers.append(anm[3])
 
-    print ",".join(numbers)
+    print_log(",".join(numbers))
     ph = config.get('SMS', 'masterPhone')
     send_message(ph, message)
 
@@ -219,7 +236,7 @@ def armAlarm(gpio, level, tick) :
     db.commit()
     db.close()
 
-    print "removed all current occupants"
+    print_log("removed all current occupants")
 
     # message the access list of people
     print "Alarm is Armed"
@@ -237,7 +254,7 @@ def alarmSounding(gpio, level, tick):
 
 def toggle_alarm_pin():
     global ALARM_TOGGLE_PIN
-    print "toggling alarm pin" 
+    print_log("toggling alarm pin")
     on(ALARM_TOGGLE_PIN)
     timeout(off,ALARM_TOGGLE_PIN,seconds=3)
     
@@ -260,8 +277,8 @@ def log_access_denied(rfid):
     else:
         id = id_row[0]
 
-    print id
-    print rfid
+    print_log(id)
+    print_log(rfid)
     cur.execute("INSERT INTO access_log (id, action, synced, date) VALUES (%d, 'Access Denied to RFID: %d', 0, DATETIME('now'))" % (id, rfid))
     db.commit()   
     db.close()
@@ -271,7 +288,7 @@ def is_alarm_armed():
     global ALARM_ARMED_STATUS_PIN
     
     status = pi.read(ALARM_ARMED_STATUS_PIN) == 0
-    print "Checking alarm, currently armed? %s" % status
+    print_log("Checking alarm, currently armed? %s" % status)
 
     return status
 
@@ -291,11 +308,11 @@ def tag_scanned(bits, rfid):
     global is_alarm_sounding
     global DOOR_STRIKE_PIN
 
-    print "Tag was scanned: %d" % rfid
+    print_log("Tag was scanned: %d" % rfid)
 
     (name, allowed) = is_allowed(rfid)
     if (allowed):
-        print "I know you, you're \"%s\". I'm letting you in" % name
+        print_log("I know you, you're \"%s\". I'm letting you in" % name)
 
         # check the status of the alarm (if armed, change)
         # gpio pin held high, gets pulled down when alarm is (??????)
@@ -304,11 +321,11 @@ def tag_scanned(bits, rfid):
         if is_alarm_sounding:
             member_details = get_member_by_rfid(rfid)
             alert_alarm_members("Alarm has been disarmed! by %s %s " % (member_details[1], member_details[3]))
-            print("disabling alarm...")
+            print_log("disabling alarm...")
 
         # to change alarm, output on a gpio pin for 3 second
         if is_alarm_armed():
-            print("Alarm was armed, need to disarm..")
+            print_log("Alarm was armed, need to disarm..")
             toggle_alarm_pin()
 	
         # Beep to say you're allowed
