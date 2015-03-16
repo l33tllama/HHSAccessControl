@@ -58,7 +58,7 @@ config = config = ConfigParser.RawConfigParser()
 
 # terminal logging
 def print_log(message):
-	outMsg = dt.datetime.strftime(dt.datetime.now(), "%a %d %b %Y %H:%M:%S: ") + message
+	outMsg = dt.datetime.strftime(dt.datetime.now(), "%a %d %b %Y %H:%M:%S: ") + str(message)
 	print outMsg
 
 def timeout(job_fn, *fn_args, **delta_args):
