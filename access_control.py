@@ -83,19 +83,21 @@ def is_allowed(rfid):
     results = cur.fetchall()
     #cur.execute("SELECT name FROM access_list WHERE rfid = '%s'" % rfid)
     
+    # NOTE We want to open the door first, if we're going to open it at all
+    # Needs to be responsive. No delays caused by SMS, filesystem or data access please. Do that after the door's opened.
     
     if len(results) == 0:
-        cur.execute("SELECT name FROM access_list WHERE rfid = '%s'" % rfid)
-        results = cur.fetchall()
-        if len(results) > 0:
-            print_log(results[0][1] + " scanned their tage to enter and their access membership has expired! But we're letting them in anyway..")
-            #ph = config.get('SMS', 'masterPhone')'SMS', 'masterPhone')
-            ph = results[0][3]
-            #message = "Hackerspace member " + results[0][1] + " tried to enter but their membership has expired."
-            message = "Hey " + results[0][1].split(" ")[0] + ", your Hobart Hackerspace access has expired, but we're cool and will let you in for now. Please re-register on the website."
-            send_message(ph, message)
-            #We'll let people in for now until the notifications are sent out to expired members, and their end date is increased by a fair amount..
-            return (results[0], True)
+        #cur.execute("SELECT name FROM access_list WHERE rfid = '%s'" % rfid)
+        #results = cur.fetchall()
+        #if len(results) > 0:
+        #    print_log(results[0][1] + " scanned their tage to enter and their access membership has expired!")
+        #    #ph = config.get('SMS', 'masterPhone')'SMS', 'masterPhone')
+        #    ph = results[0][3]
+        #    #message = "Hackerspace member " + results[0][1] + " tried to enter but their membership has expired."
+        #    message = "Hey " + results[0][1].split(" ")[0] + ", your Hobart Hackerspace access has expired, but we're cool and will let you in for now. Please re-register on the website."
+        #    send_message(ph, message)
+        #    #We'll let people in for now until the notifications are sent out to expired members, and their end date is increased by a fair amount..
+        #    return (results[0], True)
         db.close()
         return (None, False)
     else:
