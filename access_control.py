@@ -8,6 +8,7 @@ import wiegand
 import sqlite3 #debian module python-pysqlite2
 import requests 
 import ConfigParser
+import thread
 
 sched = Scheduler()
 sched.start()
@@ -114,7 +115,6 @@ def off(pin):
     pi.set_mode(pin, pigpio.OUTPUT)
     pi.write(pin,0)
     
-#TODO: Send via SMS, email, or whatever
 def alert_access_members(message):
 	global config
 	access_notify_members = get_access_notify_members()
@@ -124,11 +124,14 @@ def alert_access_members(message):
 		numbers.append(anm[3])
 
 	print_log(",".join(numbers))
-	#TODO: change to actual access members :P
+	    
+    #TODO: change to actual access members...
 	ph = config.get('SMS', 'masterPhone')
-	send_message(ph, message)
+    try:
+        thread.start_new_thread(send_message, (ph, message))
+    except:
+        print ("Send SMS message hread failed to start for some reason..")
 
-#TODO: send via SMS, email or whatever
 def alert_alarm_members(message):
     alarm_notify_members = get_alarm_notify_members()
     numbers = []
@@ -138,8 +141,12 @@ def alert_alarm_members(message):
 
     print_log(",".join(numbers))
     ph = config.get('SMS', 'masterPhone')
-    send_message(ph, message)
+    try:
+        thread.start_new_thread(send_message, (ph, message))
+    except:
+        print ("Send SMS message hread failed to start for some reason..")
 
+#TODO: Send message via email, Twitter or whatever
 def send_message(numbers, message):
     # http://api.smsbrodcast.com.au/api.php?username=myuser&password=abc123&from=0400111222&to=0411222333,0422333444&message=Hello%20wor
     global config
@@ -147,7 +154,10 @@ def send_message(numbers, message):
     sms_pwd = config.get('SMS', 'password')
     url = 'http://api.smsbroadcast.com.au/api.php'
     payload = {'username': sms_uname, 'password': sms_pwd, 'from': 'Hackerspace', 'to': numbers, 'message': message}
-    r = requests.get(url, params=payload)
+    try:
+        r = requests.get(url, params=payload)
+    except requests.exceptions.RequestException as e:
+        print_log("Error sending SMS message! Internet is probably down!"
 
 def get_current_occupants():
     db = sqlite3.connect('ControlPanel.db')
