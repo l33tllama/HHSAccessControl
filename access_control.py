@@ -6,7 +6,7 @@ import time
 import pigpio
 import wiegand
 import sqlite3 #debian module python-pysqlite2
-import requests 
+import requests
 import ConfigParser
 import thread
 
@@ -46,7 +46,7 @@ config = config = ConfigParser.RawConfigParser()
 
 # On alarm arm:
 # clear current_occupants table
-# alert alarm users 
+# alert alarm users
 
 # On alarm set-off
 # alert alarm people via SMS
@@ -71,22 +71,22 @@ def timeout(job_fn, *fn_args, **delta_args):
         # calls `fn(foo, bar)` after 10 seconds
         timeout(fn, foor, bar, seconds=10)
     """
-    time = dt.datetime.now() + dt.timedelta(**delta_args)
-    return sched.add_date_job(job_fn, time, fn_args)
+    the_time = dt.datetime.now() + dt.timedelta(**delta_args)
+    return sched.add_date_job(job_fn, the_time, fn_args)
 
 def is_allowed(rfid):
     db = sqlite3.connect('ControlPanel.db')
 
     cur = db.cursor()
-    #NOTE: took out check for expiry date because my tag has expired.. 
-    #NOTE: Also we should include a grace period, as before -Leo 
+    #NOTE: took out check for expiry date because my tag has expired..
+    #NOTE: Also we should include a grace period, as before -Leo
     cur.execute("SELECT name FROM access_list WHERE rfid = '%s' and end_date > date('now')" % rfid)
     results = cur.fetchall()
     #cur.execute("SELECT name FROM access_list WHERE rfid = '%s'" % rfid)
-    
+
     # NOTE We want to open the door first, if we're going to open it at all
     # Needs to be responsive. No delays caused by SMS, filesystem or data access please. Do that after the door's opened.
-    
+
     if len(results) == 0:
         #cur.execute("SELECT name FROM access_list WHERE rfid = '%s'" % rfid)
         #results = cur.fetchall()
@@ -114,23 +114,23 @@ def off(pin):
     global pi
     pi.set_mode(pin, pigpio.OUTPUT)
     pi.write(pin,0)
-    
+
 def alert_access_members(message):
 	global config
 	access_notify_members = get_access_notify_members()
-	numbers = []    
+	numbers = []
 	for anm in access_notify_members:
 		print_log("Hey %s, " % anm[1] + message)
 		numbers.append(anm[3])
 
 	print_log(",".join(numbers))
-	    
+
     #TODO: change to actual access members...
 	ph = config.get('SMS', 'masterPhone')
-    try:
-        thread.start_new_thread(send_message, (ph, message))
-    except:
-        print ("Send SMS message hread failed to start for some reason..")
+	try:
+		thread.start_new_thread(send_message, (ph, message))
+	except:
+		print ("Send SMS message hread failed to start for some reason..")
 
 def alert_alarm_members(message):
     alarm_notify_members = get_alarm_notify_members()
@@ -155,62 +155,64 @@ def send_message(numbers, message):
     url = 'http://api.smsbroadcast.com.au/api.php'
     payload = {'username': sms_uname, 'password': sms_pwd, 'from': 'Hackerspace', 'to': numbers, 'message': message}
     try:
-        r = requests.get(url, params=payload)
+        r = requests.get( url, params=payload )
+        print_log(r.text)
     except requests.exceptions.RequestException as e:
-        print_log("Error sending SMS message! Internet is probably down!"
+        print e
+        print_log("Error sending SMS message! Internet is probably down!")
 
 def get_current_occupants():
     db = sqlite3.connect('ControlPanel.db')
-    
+
     cur = db.cursor()
     cur.execute("SELECT rfid from current_occupants")
-    
+
     results = cur.fetchall()
-    
+
     db.close()
-    
+
     return results
 
 def add_occupant(rfid):
     db = sqlite3.connect('ControlPanel.db')
-    
+
     cur = db.cursor()
     cur.execute("INSERT INTO current_occupants VALUES(" + str(rfid) + ")")
-    db.commit()    
+    db.commit()
     db.close()
-    
+
 def get_access_notify_members():
     db = sqlite3.connect('ControlPanel.db')
-    
+
     cur = db.cursor()
     cur.execute("SELECT * FROM access_list WHERE access = 1")
-    
+
     results = cur.fetchall()
-    
+
     db.close()
-    
+
     return results
 
 def get_alarm_notify_members():
     db = sqlite3.connect('ControlPanel.db')
-    
+
     cur = db.cursor()
     cur.execute("SELECT * FROM access_list WHERE alarm = 1")
-    
+
     results = cur.fetchall()
-    
+
     db.close()
-    
+
     return results
 
 def get_member_by_rfid(rfid):
     db = sqlite3.connect('ControlPanel.db')
-    
+
     cur = db.cursor()
     cur.execute("SELECT * FROM access_list WHERE rfid = '%s'" % rfid)
-    
+
     result = cur.fetchone()
-    
+
     return result
 
 def get_id_by_rfid(rfid):
@@ -234,7 +236,7 @@ def armAlarm(gpio, level, tick) :
     timeout(alarm_arming,seconds=10)
 
     # checks alarm status
-    if not is_alarm_armed(): 
+    if not is_alarm_armed():
         toggle_alarm_pin()
 
     # ourput buzzer for 3 seconds
@@ -254,7 +256,7 @@ def armAlarm(gpio, level, tick) :
     print "Alarm is Armed"
     alert_access_members("The Alarm has been Armed")
     print
-   
+
 def alarmSounding(gpio, level, tick):
     global is_alarm_sounding
     #messages everyone on the alarm list (second last column)
@@ -269,14 +271,14 @@ def toggle_alarm_pin():
     print_log("toggling alarm pin")
     on(ALARM_TOGGLE_PIN)
     timeout(off,ALARM_TOGGLE_PIN,seconds=3)
-    
+
 def log_access_granted(rfid):
     db = sqlite3.connect('ControlPanel.db')
-    
+
     cur = db.cursor()
     id = get_id_by_rfid(rfid)
     cur.execute("INSERT INTO access_log (id, action, synced, date) VALUES (%d, 'Access Granted', 0, DATETIME('now'))" % id)
-    db.commit()   
+    db.commit()
     db.close()
 
 def log_access_denied(rfid):
@@ -292,13 +294,13 @@ def log_access_denied(rfid):
     print_log(id)
     print_log(rfid)
     cur.execute("INSERT INTO access_log (id, action, synced, date) VALUES (%d, 'Access Denied to RFID: %d', 0, DATETIME('now'))" % (id, rfid))
-    db.commit()   
+    db.commit()
     db.close()
-    
+
 def is_alarm_armed():
     global pi
     global ALARM_ARMED_STATUS_PIN
-    
+
     status = pi.read(ALARM_ARMED_STATUS_PIN) == 0
     print_log("Checking alarm, currently armed? %s" % status)
 
@@ -306,12 +308,12 @@ def is_alarm_armed():
 
 def get_member_by_rfid(rfid):
     db = sqlite3.connect('ControlPanel.db')
-    
+
     cur = db.cursor()
     cur.execute("SELECT * FROM access_list WHERE rfid = '%s'" % rfid)
-    
+
     result = cur.fetchone()
-    
+
     return result
     return False
 
@@ -328,7 +330,7 @@ def tag_scanned(bits, rfid):
 
         # check the status of the alarm (if armed, change)
         # gpio pin held high, gets pulled down when alarm is (??????)
-        
+
         # if alarm has been acvite, then message everyone on the alarm list as well
         if is_alarm_sounding:
             member_details = get_member_by_rfid(rfid)
@@ -348,7 +350,7 @@ def tag_scanned(bits, rfid):
         occupants = get_current_occupants()
 	
         # check if they're in the local list of current occupants (sqlite)
-        # Add to the list of people who are in the building (sqlite)   
+        # Add to the list of people who are in the building (sqlite)
         occupant_found = False
         for occupant in occupants:
         # if occupant has already been added to current_occupants list - don't add and don't alert anyone
@@ -359,16 +361,16 @@ def tag_scanned(bits, rfid):
             # If occupant hasn't been added - add to current_occupants and alert all in 'access' list
         if occupant_found is False:
             # Send a message to anyone on the access list (access_list.access = 1)
-            member_details = get_member_by_rfid(rfid)            
+            member_details = get_member_by_rfid(rfid)
             alert_access_members("New Hackerspace occupant: %s %s " % (member_details[1],member_details[3]))
             add_occupant(rfid)
-        
+
         # Add to the access log (sqlite) logging using date and civiID [3] and the date
         log_access_granted(rfid)
 	
     else:
         print "You're not allowed in"
-        
+
         # Beep beep beep to say you're not allowed
         timeout(off,24,seconds=0.4)
         timeout(on,24,seconds=0.5)
@@ -388,7 +390,7 @@ def tag_scanned(bits, rfid):
         log_access_denied(rfid)
 
     print
-    
+
 
 def main():
     global pi
