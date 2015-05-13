@@ -106,7 +106,11 @@ cur = db.cursor()
 external_data,external_rfid = get_external_data()
 local_data = get_local_data()
 local_rfid = get_local_rfid()
-#print external_data
-#print local_data
+print "External DB"
+for user in  external_data:
+	print user
+print "Local DB"
+for user in local_data:
+	print user
 sync(external_data, local_data, local_rfid, external_rfid)
 

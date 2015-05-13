@@ -262,7 +262,12 @@ def alarmSounding(gpio, level, tick):
     #messages everyone on the alarm list (second last column)
     # set a flag so that if the alrarm is turned off by any member, it messages the entire alarm list (not just the access list)
     if not is_alarm_sounding:
-        alert_alarm_members("Alarm at the Hackerspace has been activated (is Sounding)!")
+        #debounce
+        time.sleep(2)
+        if pi.read(ALARM_SOUNDING_STATUS_PIN) == 1:
+            print "debounce - bounced"
+            return
+        alert_alarm_members("Intruder alert: Security Alarm at the Hackerspace has been activated!")
         is_alarm_sounding = True
         print
 
@@ -335,6 +340,7 @@ def tag_scanned(bits, rfid):
         if is_alarm_sounding:
             member_details = get_member_by_rfid(rfid)
             alert_alarm_members("Alarm has been disarmed! by %s %s " % (member_details[1], member_details[3]))
+            is_alarm_sounding = False
             print_log("disabling alarm...")
 
         # to change alarm, output on a gpio pin for 3 second
@@ -405,7 +411,7 @@ def main():
 
     # interrupt for alarm souding armActive
     ab = pi.callback(ALARM_SOUNDING_STATUS_PIN, pigpio.FALLING_EDGE, alarmSounding)
-
+    
     while True:
         time.sleep(10)
 
