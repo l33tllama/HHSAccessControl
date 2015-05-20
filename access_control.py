@@ -350,7 +350,7 @@ def tag_scanned(bits, rfid):
 	
         # Beep to say you're allowed
         on(DOOR_STRIKE_PIN)
-        timeout(off,DOOR_STRIKE_PIN,seconds=3)
+        timeout(off,DOOR_STRIKE_PIN,seconds=6.5)
         timeout(off,24,seconds=0.2)
         timeout(on,24,seconds=1)
         occupants = get_current_occupants()
