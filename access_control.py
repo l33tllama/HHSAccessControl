@@ -375,7 +375,10 @@ def tag_scanned(bits, rfid):
         log_access_granted(rfid)
 	
     else:
-        print name + " isn't allowed in. They sould fix that!"
+        if name is not None:
+            print name + " isn't allowed in. They sould fix that!"
+        else:
+            print "Some random isn't allowed in"
 
         # Beep beep beep to say you're not allowed
         timeout(off,24,seconds=0.4)
