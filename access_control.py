@@ -339,7 +339,7 @@ def tag_scanned(bits, rfid):
         # if alarm has been acvite, then message everyone on the alarm list as well
         if is_alarm_sounding:
             member_details = get_member_by_rfid(rfid)
-            alert_alarm_members("Alarm has been disarmed! by %s %s " % (member_details[1], member_details[3]))
+            #alert_alarm_members("Alarm has been disarmed! by %s %s " % (member_details[1], member_details[3]))
             is_alarm_sounding = False
             print_log("disabling alarm...")
 
@@ -368,11 +368,11 @@ def tag_scanned(bits, rfid):
         if occupant_found is False:
             # Send a message to anyone on the access list (access_list.access = 1)
             member_details = get_member_by_rfid(rfid)
-            alert_access_members("New Hackerspace occupant: %s %s " % (member_details[1],member_details[3]))
-            add_occupant(rfid)
+            #alert_access_members("New Hackerspace occupant: %s %s " % (member_details[1],member_details[3]))
+            # add_occupant(rfid)
 
         # Add to the access log (sqlite) logging using date and civiID [3] and the date
-        log_access_granted(rfid)
+        # log_access_granted(rfid)
 	
     else:
         if name is not None:
@@ -396,7 +396,7 @@ def tag_scanned(bits, rfid):
         db.close()
 
         # if theres a result, sms them saying they have expires on end_date
-        log_access_denied(rfid)
+        # log_access_denied(rfid)
 
     print
 
