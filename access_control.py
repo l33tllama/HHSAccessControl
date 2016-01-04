@@ -244,13 +244,13 @@ def armAlarm(gpio, level, tick) :
     timeout(on,24,seconds=8)
 
     # clears current occupants
-    db = sqlite3.connect('ControlPanel.db')
-    cur = db.cursor()
-    cur.execute("DELETE from current_occupants")
-    db.commit()
-    db.close()
+    # db = sqlite3.connect('ControlPanel.db')
+    # cur = db.cursor()
+    # cur.execute("DELETE from current_occupants")
+    # db.commit()
+    # db.close()
 
-    print_log("removed all current occupants")
+    # print_log("removed all current occupants")
 
     # message the access list of people
     print "Alarm is Armed"
