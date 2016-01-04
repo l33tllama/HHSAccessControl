@@ -254,7 +254,7 @@ def armAlarm(gpio, level, tick) :
 
     # message the access list of people
     print "Alarm is Armed"
-    alert_access_members("The Alarm has been Armed")
+    # alert_access_members("The Alarm has been Armed")
     print
 
 def alarmSounding(gpio, level, tick):
