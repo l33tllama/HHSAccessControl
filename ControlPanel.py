@@ -98,7 +98,7 @@ def update_local(rfid, name, id, phone, end_date, alarm, access):
     db.commit ()
     print "Updating: %s, %s" % (rfid,name)
     
-config.read('/home/pi/access_control/config.cfg')
+config.read('/home/pi/HHSAccesControl/config.cfg')
 dbName = config.get('SQLite', 'filename')
 db = sqlite3.connect(dbName)
 cur = db.cursor()
