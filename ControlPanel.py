@@ -4,6 +4,8 @@ import sqlite3 #debian module python-pysqlite2
 import MySQLdb #debian module python-mysqldb
 import ConfigParser
 
+print "starting!"
+
 global config
 config = ConfigParser.RawConfigParser()
 
@@ -49,12 +51,12 @@ def sync(external, local, localrfid, externalrfid):
         if not rfid in localrfid:
             add_local(rfid, name, id, phone, end_date, alarm, access)
 
-	# Loop through all internal rfid tags, if they don't exist externally,
-	# remove the local copy
-	for rfid in localrfid.keys():
-		name = localrfid[rfid]
-		if not rfid in externalrfid:
-			remove_local(rfid, name)
+    # Loop through all internal rfid tags, if they don't exist externally,
+    # remove the local copy
+    for rfid in localrfid.keys():
+	name = localrfid[rfid]
+	if not rfid in externalrfid:
+		remove_local(rfid, name)
 
     # Loop through and look for changes to other things, and update
     for x in range(6) :
@@ -62,7 +64,8 @@ def sync(external, local, localrfid, externalrfid):
 
 def compare(fieldname,external,local):
     for row in external :
-        data = row[fieldname]
+	data = row[fieldname]
+
         rfid = row[0]
         name = row[1]
         id = row[2]
@@ -70,6 +73,7 @@ def compare(fieldname,external,local):
         end_date = row[4]
         alarm = row[5]
         access = row[6]
+
         found = True
         for row in local:
             data2 = row[fieldname]
@@ -97,8 +101,8 @@ def update_local(rfid, name, id, phone, end_date, alarm, access):
     cur.execute("UPDATE access_list set name = '%s', id = '%s', phone = '%s', end_date = '%s', alarm = '%s', access = '%s' WHERE rfid = '%s'" % (name, id, phone, end_date, alarm, access,rfid))
     db.commit ()
     print "Updating: %s, %s" % (rfid,name)
-    
-config.read('/home/pi/HHSAccesControl/config.cfg')
+
+config.read('/home/pi/HHSAccessControl/config.cfg') 
 dbName = config.get('SQLite', 'filename')
 db = sqlite3.connect(dbName)
 cur = db.cursor()

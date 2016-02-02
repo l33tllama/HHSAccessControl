@@ -404,7 +404,7 @@ def tag_scanned(bits, rfid):
 def main():
     global pi
     global config
-    config.read('/home/pi/access_control/config.cfg')
+    config.read('/home/pi/HHSAccessControl/config.cfg')
     pi = pigpio.pi()
     pi.write(24,1)
     w = wiegand.decoder(pi, 27, 17, tag_scanned, 25)
