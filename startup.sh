@@ -1,2 +1,2 @@
 #!/bin/sh
-runuser -l pi -c "/usr/bin/screen -dmS doorman /usr/bin/python2 /home/pi/HHSAccessControl/access_control.py"
+runuser -l pi -c 'cd /home/pi/HHSAccessControl; screen -dmS doorman python /home/pi/HHSAccessControl/access_control.py'
