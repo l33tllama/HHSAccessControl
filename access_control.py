@@ -353,13 +353,15 @@ def tag_scanned(bits, rfid):
         timeout(off,DOOR_STRIKE_PIN,seconds=6.5)
         timeout(off,24,seconds=0.2)
         timeout(on,24,seconds=1)
+
+
+
+        ''' Disabled getting current occupants for now!! Need to fix things..
         occupants = get_current_occupants()
 	
         # check if they're in the local list of current occupants (sqlite)
         # Add to the list of people who are in the building (sqlite)
         
-
-        ''' Disabled getting current occupants for now!! Need to fix things..
         occupant_found = False
         for occupant in occupants:
         # if occupant has already been added to current_occupants list - don't add and don't alert anyone
