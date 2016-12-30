@@ -357,6 +357,9 @@ def tag_scanned(bits, rfid):
 	
         # check if they're in the local list of current occupants (sqlite)
         # Add to the list of people who are in the building (sqlite)
+        
+
+        ''' Disabled getting current occupants for now!! Need to fix things..
         occupant_found = False
         for occupant in occupants:
         # if occupant has already been added to current_occupants list - don't add and don't alert anyone
@@ -373,6 +376,7 @@ def tag_scanned(bits, rfid):
 
         # Add to the access log (sqlite) logging using date and civiID [3] and the date
         # log_access_granted(rfid)
+        '''
 	
     else:
         if name is not None:
