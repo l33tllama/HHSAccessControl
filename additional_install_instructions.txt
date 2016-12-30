@@ -5,9 +5,11 @@
 * pigpio - needs to be downloaded, compiled and manually installed
 * pip install apscheduler==2.1.2 (for Debian Jessie) 
 
+run sqlite3db_init.sh to create empty sqlite db for local storage
+
 # Local Crontab
 */3 * * * * /usr/bin/python2 /home/pi/HHSAccessControl/ControlPanel.py
-@reboot /usr/bin/screen -dmS doorman /usr/bin/python2 /home/ppi/HHSAccessControl/access_control.py
+@reboot /usr/bin/screen -dmS doorman /usr/bin/python2 /home/pi/HHSAccessControl/access_control.py
 
 # Root crontab
 @reboot /usr/local/bin/pigpiod
