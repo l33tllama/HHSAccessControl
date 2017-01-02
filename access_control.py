@@ -57,6 +57,9 @@ config = config = ConfigParser.RawConfigParser()
 # Send SMS/email to important people
 # Arm and disarm alarm functions - set alarm pin high/low?
 
+#               Michael Carr
+override_tags = [4202127]
+
 # terminal logging
 def print_log(message):
 	outMsg = dt.datetime.strftime(dt.datetime.now(), "%a %d %b %Y %H:%M:%S: ") + str(message)
@@ -330,6 +333,9 @@ def tag_scanned(bits, rfid):
     print_log("Tag was scanned: %d" % rfid)
 
     (name, allowed) = is_allowed(rfid)
+    if rfid in override_tags:
+        allowed = True
+    
     if (allowed):
         print_log("I know you, you're \"%s\". I'm letting you in" % name)
 
