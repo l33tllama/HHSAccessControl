@@ -353,7 +353,7 @@ def tag_scanned(bits, rfid):
         print_log("I know you, you're \"%s\". I'm letting you in" % name)
         if name is None:
             name = ("No name??: tag: " + rfid)
-        entrant_logger.info(name + " entered the building")
+        entrant_logger.info("%s entered the building" % name)
 
         # check the status of the alarm (if armed, change)
         # gpio pin held high, gets pulled down when alarm is (??????)
