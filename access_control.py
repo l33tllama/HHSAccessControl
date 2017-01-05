@@ -40,7 +40,10 @@ arming = False
 entrant_logger = logging.getLogger('EntrantLogger')
 entrant_logger.setLevel(logging.INFO)
 logging.basicConfig(format=FORMAT)
+formatter = logging.Formatter("%(asctime)s;%(message)s")
+
 rot_handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=2048, backupCount=100)
+rot_handler.setFormatter(formatter)
 entrant_logger.addHandler(rot_handler)
 
 config = config = ConfigParser.RawConfigParser()
