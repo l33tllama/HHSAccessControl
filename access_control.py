@@ -9,6 +9,8 @@ import sqlite3 #debian module python-pysqlite2
 import requests
 import ConfigParser
 import thread
+import logging
+import logging.handlers
 
 sched = Scheduler()
 sched.start()
@@ -28,9 +30,18 @@ ALARM_TOGGLE_PIN = 10
 ALARM_ARMED_STATUS_PIN = 8
 ALARM_SOUNDING_STATUS_PIN = 7
 DOOR_STRIKE_PIN = 22
+LOG_FILENAME = 'entrant_log.log'
+FORMAT = "%(asctime)-15s %(message)s"
 
 is_alarm_sounding = False
 arming = False
+
+# Entrant logger
+entrant_logger = logging.getLogger('EntrantLogger')
+entrant_logger.setLevel(logging.INFO)
+logging.basicConfig(format=FORMAT)
+rot_handler = logging.handlers.RotatingFileHandler(LOG_FILENAME, maxBytes=20, backupCount=100)
+entrant_logger.addHandler(rot_handler)
 
 config = config = ConfigParser.RawConfigParser()
 # ==General functionality==
@@ -238,6 +249,8 @@ def armAlarm(gpio, level, tick) :
     arming = True
     timeout(alarm_arming,seconds=10)
 
+    entrant_logger.info("Alarm enabled. All entrants would have left.")
+
     # checks alarm status
     if not is_alarm_armed():
         toggle_alarm_pin()
@@ -338,6 +351,9 @@ def tag_scanned(bits, rfid):
     
     if (allowed):
         print_log("I know you, you're \"%s\". I'm letting you in" % name)
+        if name is None:
+            name = ("No name??: tag: " + rfid)
+        entrant_logger.info(name + " entered the building")
 
         # check the status of the alarm (if armed, change)
         # gpio pin held high, gets pulled down when alarm is (??????)
